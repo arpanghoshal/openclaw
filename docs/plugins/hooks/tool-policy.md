@@ -255,15 +255,16 @@ by `before_tool_call`. Omit the matcher to retain match-all behavior.
 
 `after_tool_call` observes a tool call that has already run. It is the other
 half of `before_tool_call` for plugins that record what a gated call did. It
-receives the same `ctx` as `before_tool_call` (`PluginHookToolContext`) and:
+receives the same context type as `before_tool_call` (`PluginHookToolContext`);
+available context fields depend on the emitting harness. Its event contains:
 
-- `event.toolName`
-- `event.params`
-- optional `event.runId`
-- optional `event.toolCallId`
-- optional `event.result`
-- optional `event.error`
-- optional `event.durationMs`
+- `event.toolName`: the tool name.
+- `event.params`: the tool arguments, including adjustments from `before_tool_call`.
+- optional `event.runId`: the owning run identifier.
+- optional `event.toolCallId`: the tool invocation identifier.
+- optional `event.result`: the tool outcome supplied by the harness.
+- optional `event.error`: an error message supplied or extracted by the harness.
+- optional `event.durationMs`: elapsed milliseconds when the start time is known.
 
 ```typescript
 type AfterToolCallEvent = {
@@ -285,7 +286,7 @@ It is an observation hook, so it cannot change what already happened:
 
 Both `result` and `error` are optional, so an event carrying neither is not
 evidence that the tool succeeded. A handler that infers success from the
-absence of `error` will record a failed call as a successful one; treat an
+absence of `error` can record a failed call as a successful one; treat an
 unreadable outcome as unknown rather than as either result. What `result`
 carries for exec and bash-family tools is tracked separately in
 [#102961](https://github.com/openclaw/openclaw/issues/102961).
